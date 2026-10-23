@@ -12,7 +12,7 @@ services:
       LLM_BACKEND: ${LLM_BACKEND:-ollama}
       LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b-instruct}
       OLLAMA_URL: http://host.docker.internal:11434
-      TOP_K: ${TOP_K:-4}
+      TOP_K: ${TOP_K:-3}
       MIN_SCORE: ${MIN_SCORE:-0.5}
       CHROMA_PATH: /data/chroma
       SQLITE_PATH: /data/sqlite/app.db

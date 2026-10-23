@@ -150,7 +150,23 @@ python scripts/run_eval.py --label topk5 --top-k 5
 - Retrieval hit rate means the expected doc_id is in the top-k chunks, read from the audit.
 - Latency, LLM calls and tokens are also read from the audit records.
 
-Results are in `eval/results/`. EVAL_RESULTS_PLACEHOLDER
+Results are in `eval/results/`.
+
+| Metric | TOP_K = 3 | TOP_K = 5 |
+|---|---|---|
+| Answer type correct | 20/25 (80%) | 20/25 (80%) |
+| Answer correctness | 19/23 (83%) | 19/23 (83%) |
+| Citation accuracy | 15/17 (88%) | 15/17 (88%) |
+| Abstention accuracy | 23/25 (92%) | 23/25 (92%) |
+| Tool-result correctness | 7/8 (88%) | 7/8 (88%) |
+| Retrieval hit rate | 7/9 (78%) | 7/9 (78%) |
+| Latency p50 / p95 | 23.9 s / 40.2 s | 22.0 s / 31.0 s |
+| LLM calls / tokens per question | 1.64 / 893 | 1.64 / 1040 |
+
+**Chosen: TOP_K = 3.** Accuracy is identical, and it uses about 15% fewer tokens per question. (Latency differences come from the local model being shared with the running app, not from TOP_K.)
+
+**What the evaluation found, and what we changed.** All 6 misses came from the 7B model mislabelling the question category: general questions were treated as personal, an "am I / can I" question was treated as policy, and off-topic questions were labelled other_student or unclear. We added deterministic code checks after the Understand step (no "I/me/my" means it can't be personal; "am I / can I" means it is personal eligibility; unclear questions search and abstain if evidence is weak), plus tests. These numbers were measured **before** that fix. A rerun is the next step. The other remaining miss (E05) is wording only: the right answer type and citation, but the one-line answer left out the number.
+
 
 ## Assumptions
 - `as_of_date` defaults to today. Every precedence decision is made relative to it.
