@@ -1,19 +1,28 @@
 """
 FastAPI app: the fixed API contract from the brief (spec Part G). Kept thin on
 purpose: each endpoint validates its input and calls one function elsewhere.
-/health and /sources work now. /ask, /ingest and /audit return 501 until the
-graph (step 2) and ingestion (Person A) land.
+Identity for /ask comes only from the X-Student-Id header [BRIEF R7].
+/ingest returns 501 until Person A's ingest_file() lands.
 """
 
+from datetime import date
+
+import httpx
 from fastapi import FastAPI, File, Form, Header, HTTPException, UploadFile
 
-from app import db, llm
+from app import audit, db, llm
 from app.schemas import AskRequest, AskResponse, HealthResponse, IngestResponse
 
+# TEMPORARY guards: until Persons A and B push their modules (WORKLOG section 5),
+# the API still starts and /health still answers. Remove once their files are on main.
 try:
     from app import retrieval
-except ImportError:  # TEMPORARY: until Person A pushes app/retrieval.py (WORKLOG section 5)
+except ImportError:
     retrieval = None
+try:
+    from app import graph
+except ImportError:  # graph.py imports A's and B's modules
+    graph = None
 
 app = FastAPI(title="University Student Services Assistant")
 
@@ -41,8 +50,14 @@ def sources() -> list[dict]:
 
 @app.post("/ask", response_model=AskResponse)
 def ask(body: AskRequest, x_student_id: str | None = Header(default=None)) -> AskResponse:
-    # Identity comes only from the X-Student-Id header, never the question text [BRIEF R7].
-    raise HTTPException(status_code=501, detail=NOT_IMPLEMENTED)
+    if graph is None:
+        raise HTTPException(status_code=503, detail="The answering pipeline is not available yet.")
+    as_of_date = body.as_of_date or date.today().isoformat()
+    try:
+        return graph.run_ask(body.question, as_of_date, x_student_id or None)
+    except httpx.HTTPError:
+        # Better an honest error than an answer produced without the model's checks.
+        raise HTTPException(status_code=503, detail="The language model is not reachable.")
 
 
 @app.post("/ingest", response_model=IngestResponse)
@@ -51,5 +66,8 @@ def ingest(file: UploadFile = File(...), metadata: str = Form(...)) -> IngestRes
 
 
 @app.get("/audit/{trace_id}")
-def audit(trace_id: str) -> dict:
-    raise HTTPException(status_code=501, detail=NOT_IMPLEMENTED)
+def get_audit(trace_id: str) -> dict:
+    record = audit.read(trace_id)
+    if record is None:
+        raise HTTPException(status_code=404, detail="No audit record with this trace_id.")
+    return record

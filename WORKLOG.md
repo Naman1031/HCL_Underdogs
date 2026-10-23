@@ -87,6 +87,12 @@ _Write here when you need something from someone else's file. The owner deletes 
 - **A → C (done):** `app/retrieval.py` is pushed with `health() -> "ok" | "error"` and a working `search()`. Imports are lazy, so importing it never breaks `/health`. Naman, you can drop the temporary import guard in `app/main.py`.
 - **A → B (done):** `data/rules.csv` + `scripts/load_rules.py` are pushed. All 4 parameters you asked for are there: `min_attendance_pct` (75 from ACAD-ORD-2022 R.1(B).22 p.27, raised to **80** by the superseding circular from 2026-08-01), `pass_mark_pct` **40**, `placement_min_cgpa` **6.0**, `placement_max_backlogs` **0**. Supplementary: `supplementary_allowed_results in FAIL;ABSENT` — **DETAINED is NOT eligible** (must repeat the course), see ACAD-CIRC-2026-08 clause 3.2. Run `python scripts/load_rules.py` -> "Loaded 9 rules".
 - **A → whoever has the model machine:** run `python scripts/ingest_folder.py` then `python scripts/load_rules.py`. `retrieval.py`/`ingest.py` are untested locally (no model on A's laptop).
+- **C → B (Naman → Pranjal):** `graph.py` reads these tool output keys, taken from spec D.7 and the brief's example. Please keep them, or tell me if they change:
+  - `check_exam_eligibility`, `check_supplementary_eligibility`, `check_placement_eligibility`: the decision goes in `output["result"]` as `"ELIGIBLE"`, `"NOT_ELIGIBLE"` or `"RULE_UNCERTAIN"`. `RULE_UNCERTAIN` becomes `conflict_flagged`.
+  - `get_attendance`: `output` has `classes_held`, `classes_attended` and `attendance_pct`.
+  - `get_student_profile`: `output` has `cgpa` and `active_backlogs`.
+  - Every tool: put the rule IDs it used in `ToolResult.rule_ids`. The graph cites those rules, so they must exist in `rule_registry`. On failure, use `status="error"` and `output={"error": "<message>"}`; that becomes `not_found` with the message in the explanation.
+  - `guardrail.check` should also refuse `category == "other_student"` (spec D.3). The graph already refuses it as a backstop.
 
 ---
 
@@ -203,4 +209,17 @@ Add a new entry at the **bottom of your own section** for each push:
   curl localhost:8000/health
   ```
   (Install the full `requirements.txt` when you need torch, Docling or Chroma. It is large.)
+- AI-generated? yes (Claude Code), logged in docs/ai_usage.md
+
+### 2026-10-23: /ask workflow and audit (step 2)
+- Files: `app/graph.py` (new), `app/audit.py` (new), `app/main.py`, `app/llm.py` (prompts), `app/schemas.py` (+ `ComposeOutput` in the C section), `tests/conftest.py`, `tests/test_api.py`
+- What it does:
+  - `graph.py`: the LangGraph flow from spec D.2. Understand (LLM) → Guardrail → code router → Policy, Personal, What-if or Clarify → Compose (LLM) → Assemble → Audit. At most 2 LLM calls. Code sets `answer_type`, the one-line answer for `calculated`, and every citation. Compose is skipped for `refused`, `not_found` and `clarification_needed`.
+  - Policy: search → `precedence.applicability()` (current is kept, upcoming becomes a note, expired and out-of-scope are dropped) → remove clauses superseded by level 1-2 documents → top `TOP_K` → `precedence.resolve_rules()` when a parameter is known → `MIN_SCORE` check.
+  - **Uses A's real interface:** `precedence.py` takes plain dicts and a `date`, so the graph passes `model_dump()` and `date.fromisoformat(...)`.
+  - Personal and What-if: plain if/elif tool choice. `student_id` always comes from the header. If the course is unknown, the answer is `clarification_needed` with the student's course list. What-if passes `assume_passed` to `check_placement_eligibility` and lists each assumption.
+  - `audit.py` and `GET /audit/{trace_id}`: Annex D record with no question text. `/ask` returns 503 (not a wrong answer) if Ollama is unreachable.
+- How to check it: `.venv\Scripts\python -m pytest -q`: 31 passed, including A's and B's tests. Tests use A's real precedence code. Retrieval, tools and guardrail are faked, and an empty stand-in is used while a module is missing (see `tests/conftest.py`).
+- Live check with real `qwen2.5:7b-instruct` (fake retrieval): valid JSON from both calls, 2 LLM calls, cited answer. The first call takes about 90 s while the model loads, later questions 6-15 s.
+- Not yet: `/ask` returns 503 until A pushes `retrieval.py` (see section 5). `/ingest` is still 501. The number grounding check comes in step 4.
 - AI-generated? yes (Claude Code), logged in docs/ai_usage.md

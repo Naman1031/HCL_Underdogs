@@ -179,6 +179,12 @@ class Understanding(BaseModel):
     search_query: str = ""
 
 
+class ComposeOutput(BaseModel):
+    """Output of the Compose LLM call (spec D.3 node 7). `answer` is used only for retrieved_fact."""
+    answer: str
+    explanation: str
+
+
 class LLMUsage(BaseModel):
     calls: int = 0
     tokens: int = 0  # prompt_eval_count + eval_count from Ollama
