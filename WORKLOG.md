@@ -145,6 +145,14 @@ Add a new entry at the **bottom of your own section** for each push:
 - How to check it: after `load_rules.py`, run `python scripts/generate_students.py` (add `MOCK_LLM=true` to run without Ollama). With an empty registry it stops with `NO_RULE`. `pytest` 20 passed.
 - AI-generated? yes (also logged in docs/ai_usage.md)
 
+### 2026-10-23: Student validator and loader
+- Files: `scripts/validate_students.py`, `scripts/load_students.py`
+- What it does:
+  - `validate_students.py`: every check in spec F.6 (columns and types, ID formats, duplicates, attended <= held, marks, total = internal + external, result vs the pass mark from `rule_registry`, programmes matching, references). On our data it also checks reserved IDs, minimum counts and all 10 planned edge cases. Writes `validation_report.txt` into the folder; exit code 1 on errors.
+  - `load_students.py --dir <folder>`: runs the generic checks first and loads nothing if one fails, then upserts every CSV present in one transaction (missing files skipped). It accepts S9xxx IDs and JDG courses, and lets a folder reference students or courses already in SQLite. Loading the same folder twice is safe.
+- How to check it: `python scripts/validate_students.py` then `python scripts/load_students.py --dir data/students` (judges: `docker compose exec api python scripts/load_students.py --dir /data/test_students`). `pytest` 20 passed.
+- AI-generated? yes (also logged in docs/ai_usage.md)
+
 ### Person C: Foundation, Pipeline & Shipping
 
 ### 2026-10-23: Foundation (step 1, spec Phase 0)

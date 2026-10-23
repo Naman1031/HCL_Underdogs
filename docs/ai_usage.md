@@ -22,6 +22,7 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 | 2026-10-23 | Edge-case plan (`docs/data_card.md` draft) and generator prompts in `data/prompts/` | Claude Code | Checked against spec F.6 edge-case list; prompt placeholders test-filled with Python `string.Template` |
 | 2026-10-23 | Stubs: `app/tools.py`, `app/guardrail.py` and their stub tests | Claude Code | Signatures compared with WORKLOG section 3 and spec D.7; `pytest` 10 passed |
 | 2026-10-23 | `scripts/generate_students.py` and the generator models in `app/schemas.py` | Claude Code | Mock dry run: all 10 edge cases checked by hand (e.g. 30/40 and 29/40 at 75%, CGPA 7.00/6.99). A fake LLM returning bad replies confirmed errors are logged and retried, and fixed values are kept. End-to-end run against a test rule registry; empty registry stops with `NO_RULE`. `pytest` 20 passed |
+| 2026-10-23 | `scripts/validate_students.py`, `scripts/load_students.py` | Claude Code | Against a test rule registry: mock-generated data passes (0 errors); a copy with 6 deliberate breaks (attended > held, wrong total, wrong result, missing ABSENT edge case, S9xxx ID, JDG course, bad ID) fails with each one reported. Loader: loading twice keeps the same row counts, a broken folder loads nothing, a judges-style folder (S9001, JDG101, no attendance.csv) loads. `pytest` 20 passed |
 
 ## Person C: Foundation, Pipeline & Shipping
 
