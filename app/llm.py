@@ -24,8 +24,10 @@ category is one of:
 - personal_data: asks about the student's own records (attendance, marks, CGPA, backlogs)
 - personal_eligibility: asks whether the student is eligible for something
 - what_if: a hypothetical about the student ("if I pass X, will I ...")
-- other_student: asks about another student's records
+- other_student: asks for the records of a specific other student (a named person or another student ID)
 - unclear: none of the above, or too vague to tell
+General questions such as "who is allowed to..." or "how many ... are allowed" are policy_fact or
+procedure, not personal. Questions about events, sports, prices or other topics are policy_fact.
 Choose course_code and parameter only from the lists you are given; otherwise use null.
 assumptions: for what_if only, each hypothetical as a short phrase, e.g. "pass CS201 supplementary".
 search_query: the question rewritten as a short search query.

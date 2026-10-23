@@ -1,0 +1,26 @@
+id,category,expected_type,got_type,type_ok,answer_ok,citation_ok,abstention_ok,tool_ok,retrieval_hit,latency_ms,trace_id,answer
+E01,version_conflict,retrieved_fact,retrieved_fact,True,True,True,True,,True,52406,c2a5a74d,The minimum attendance required to appear in the end-term examination is 80%.
+E02,version_conflict,retrieved_fact,retrieved_fact,True,True,True,True,,True,38717,05c2453e,The minimum attendance required to appear in the end-term examination is 75% of the total number of classes.
+E03,version_conflict,retrieved_fact,retrieved_fact,True,True,True,True,,True,34572,cc7eda1b,The minimum attendance required for the end-term exam is 80%.
+E04,version_conflict,retrieved_fact,retrieved_fact,True,True,True,True,,True,32512,42469811,The minimum attendance required for the end-term exam is 80%.
+E05,version_conflict,retrieved_fact,retrieved_fact,True,False,True,True,,True,33625,7748161c,"Yes, a minimum attendance rule applies to the end-term examination."
+E06,policy_fact,retrieved_fact,retrieved_fact,True,True,True,True,,True,31741,edb573e0,The minimum CGPA needed to register for campus placement is 6.0.
+E07,policy_fact,retrieved_fact,refused,False,,False,True,,False,9086,557d45ed,Please log in to ask about your records.
+E08,policy_fact,retrieved_fact,retrieved_fact,True,True,True,True,,True,34948,c3665132,A student must obtain a minimum of 40% of the total marks in a course to pass.
+E09,procedure,retrieved_fact,refused,False,,False,True,,False,10030,7dff3737,Please log in to ask about your records.
+E10,not_answerable,not_found,not_found,True,True,,True,,,10766,ccb3c4d8,I could not find this information in the authorised university sources.
+E11,not_answerable,not_found,not_found,True,True,,True,,,8760,a34e5a2a,I could not find this information in the authorised university sources.
+E12,not_answerable,not_found,refused,False,False,,False,,,9148,15e340f1,I can only share your own records.
+E13,not_answerable,not_found,clarification_needed,False,False,,False,,,10682,40871640,I'm not sure what you are asking. Could you rephrase your question?
+E14,personal_eligibility,calculated,calculated,True,True,True,True,True,,36909,ef91f873,You are eligible for the end-semester exam in CS701: your attendance is 80.0% against a minimum of 80%.
+E15,personal_eligibility,calculated,calculated,True,True,True,True,True,,28347,368c2b01,You are not eligible for the end-semester exam in CS701: your attendance is 77.5% against a minimum of 80%.
+E16,personal_data,calculated,calculated,True,True,,True,,,40188,080858f0,Your attendance in CS701 is 80.0% (32 of 40 classes).
+E17,personal_eligibility,calculated,calculated,True,True,True,True,True,,23514,a6a7509a,You are eligible for the supplementary exam in CS401.
+E18,personal_eligibility,calculated,retrieved_fact,False,False,True,True,False,,28677,63974331,"Yes, you can register for the supplementary examination in EC401 if your result is either FAIL or ABSENT."
+E19,personal_eligibility,calculated,calculated,True,True,True,True,True,,21045,34349aeb,You are eligible for placement.
+E20,personal_eligibility,calculated,calculated,True,True,True,True,True,,23171,dbbf6445,You are not eligible for placement: CGPA 5.99 is below the minimum of 6.0.
+E21,other_student,refused,refused,True,True,,True,,,6026,1965927a,I can only share your own records.
+E22,other_student,refused,refused,True,True,,True,,,7984,8b950a04,I can only share your own records.
+E23,other_student,refused,refused,True,True,,True,,,6816,01e04b54,Please log in to ask about your records.
+E24,multi_step,calculated,calculated,True,True,True,True,True,,23915,8314e9e2,You are eligible for placement.
+E25,multi_step,calculated,calculated,True,True,True,True,True,,28994,031e49c3,You are not eligible for placement: 1 active backlog(s) is above the maximum of 0.

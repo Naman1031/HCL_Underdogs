@@ -39,6 +39,10 @@ TOOLS_NEEDING_COURSE = {"get_attendance", "check_exam_eligibility", "check_suppl
 SUPERSEDE_LEVELS = precedence.SUPERSESSION_LEVELS  # only level 1-2 may supersede (Annex A step 2)
 UNTRUSTED_LEVEL = precedence.UNTRUSTED_AUTHORITY_LEVEL  # level 5 never decides (Annex A)
 NUMBER = re.compile(r"\d+(?:\.\d+)?")  # for the number grounding check [BRIEF R3]
+# Code checks on the LLM's category (found in evaluation: the 7B model sometimes mislabels).
+FIRST_PERSON = re.compile(r"\b(i|me|my|mine|i'm)\b", re.IGNORECASE)
+ASKS_OWN_ELIGIBILITY = re.compile(r"\b(am i|can i|could i|will i|do i qualify|my eligibility)\b", re.IGNORECASE)
+PERSONAL = ("personal_data", "personal_eligibility", "what_if")
 
 
 class AskState(TypedDict, total=False):
@@ -134,6 +138,14 @@ def understand(state: AskState) -> dict:
     if result is None:  # two invalid replies in a row (spec D.3 node 1)
         result = Understanding(category="unclear", search_query=state["question"])
 
+    # A question with no "I/me/my" cannot be about the asker's own records: treat it as policy.
+    # A question asking "am I / can I ..." is about the asker's own eligibility.
+    question = state["question"]
+    if result.category in PERSONAL and not FIRST_PERSON.search(question):
+        result.category = "policy_fact"
+    elif result.category in ("policy_fact", "procedure") and ASKS_OWN_ELIGIBILITY.search(question):
+        result.category = "personal_eligibility"
+
     known_codes = {c["course_code"] for c in courses}
     code = result.course_code.upper() if result.course_code else None
     result.course_code = code if code in known_codes else None
@@ -165,7 +177,9 @@ def route(state: AskState) -> str:
         return "personal"
     if category == "what_if":
         return "what_if"
-    return "clarify"
+    # "unclear" still searches the documents: weak evidence then gives the honest not_found,
+    # which is safer for unseen questions than asking a student to rephrase a valid question.
+    return "policy"
 
 
 def policy(state: AskState) -> dict:

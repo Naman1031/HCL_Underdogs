@@ -232,6 +232,20 @@ def test_what_if_states_its_assumptions(fakes):
     assert body["assumptions"] and "CS201" in body["assumptions"][0]
 
 
+def test_general_question_mislabelled_personal_is_answered_as_policy(fakes, monkeypatch):
+    monkeypatch.setattr(retrieval, "search", lambda query, k: [make_chunk(REG)])
+    fakes.understanding = Understanding(category="personal_eligibility", search_query="backlogs allowed")
+    body = ask("How many active backlogs are allowed for placement?")  # no login, no "I/my"
+    assert body["answer_type"] == "retrieved_fact"
+
+
+def test_can_i_question_mislabelled_policy_uses_the_tool(fakes):
+    fakes.understanding = Understanding(category="policy_fact", course_code="CS201")
+    body = ask("Can I sit the end-semester exam in CS201?", student_id="S1001")
+    assert body["answer_type"] == "calculated"
+    assert body["tools_invoked"][0]["tool"] == "check_exam_eligibility"
+
+
 def test_header_id_is_normalised_to_upper_case(fakes):
     fakes.understanding = Understanding(category="personal_eligibility", course_code="CS201")
     ask("Am I eligible for the end-semester exam in CS201?", student_id=" s1001 ")
