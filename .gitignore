@@ -1,0 +1,31 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+.pytest_cache/
+.ruff_cache/
+
+# Virtual environments
+venv/
+.venv/
+env/
+
+# Secrets — .env.example IS tracked, the real .env never is
+.env
+
+# Local data stores (Docker named volumes in production)
+*.db
+*.sqlite3
+data/chroma/
+data/sqlite/
+
+# Model caches pulled at build time
+.cache/
+*.onnx
+
+# macOS
+.DS_Store
+
+# Editors
+.vscode/
+.idea/
