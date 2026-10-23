@@ -1,0 +1,22 @@
+Create the record for this student.
+
+student_id: $student_id
+programme: $programme
+batch_year: $batch_year
+current_semester: $current_semester
+
+Current-semester courses (fill in classes_attended; classes_held is given):
+$attendance_courses
+
+Previous-semester exam results (fill in internal_marks and external_marks):
+$result_courses
+
+fixed_values (copy exactly, do not change):
+$fixed_values
+
+fill_in: $fill_in
+
+Return JSON with exactly this shape:
+{"student_id": "S0000", "full_name": "First Last", "cgpa": 0.0,
+ "attendance": [{"course_code": "XX000", "classes_held": 0, "classes_attended": 0}],
+ "results": [{"course_code": "XX000", "internal_marks": 0, "external_marks": 0}]}

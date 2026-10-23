@@ -17,6 +17,7 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 
 | Date | What was generated | Tool | How it was verified |
 |---|---|---|---|
+| 2026-10-23 | Edge-case plan (`docs/data_card.md` draft) and generator prompts in `data/prompts/` | Claude Code | Checked against spec F.6 edge-case list; prompt placeholders test-filled with Python `string.Template` |
 
 ## Person C: Foundation, Pipeline & Shipping
 

@@ -12,7 +12,7 @@ Only the owner edits a file. If you need a change in someone else's file, ask th
 
 | | Person A: Documents & Rules | Person B: Students, Tools & Eval | Person C: Foundation, Pipeline & Shipping |
 |---|---|---|---|
-| Name | Panshul | Pranjal | Naman |
+| Name | Panshul | Pranjal Mann | Naman |
 | `app/` | `ingest.py`, `retrieval.py`, `precedence.py` | `tools.py`, `guardrail.py` | `config.py`, `schemas.py`, `db.py`, `llm.py`, `graph.py`, `audit.py`, `main.py` |
 | `scripts/` | `ingest_folder.py`, `load_rules.py` | `generate_students.py`, `validate_students.py`, `load_students.py`, `run_eval.py` | `warmup.py` |
 | `data/` | `documents/`, `source_register.csv`, `rules.csv`, the 2 synthetic documents | `students/`, `prompts/` | none |
@@ -111,6 +111,12 @@ Add a new entry at the **bottom of your own section** for each push:
 ### Person A: Documents & Rules
 
 ### Person B: Students, Tools & Eval
+
+### 2026-10-23: Edge-case plan and generator prompts
+- Files: `data/prompts/student_system_prompt.txt`, `data/prompts/student_user_prompt.txt`, `docs/data_card.md` (draft)
+- What it does: fixes which student ID carries which edge case (S1001–S1010) and how code derives the exact numbers from rule thresholds; programmes B.Tech CSE / B.Tech ECE, batches 2023 / 2024, 16 courses. Thresholds are TODO until A's `data/rules.csv` exists. No code yet.
+- How to check it: read the "Edge cases" table in `docs/data_card.md`
+- AI-generated? yes (also logged in docs/ai_usage.md)
 
 ### Person C: Foundation, Pipeline & Shipping
 
