@@ -146,6 +146,28 @@ class ResultRow(BaseModel):
     result: Literal["PASS", "FAIL", "ABSENT", "DETAINED"]
 
 
+class GeneratedAttendance(BaseModel):
+    course_code: str
+    classes_held: int
+    classes_attended: int
+
+
+class GeneratedMarks(BaseModel):
+    course_code: str
+    internal_marks: int
+    external_marks: int
+
+
+class GeneratedStudent(BaseModel):
+    """LLM output for one synthetic student (scripts/generate_students.py).
+    Ranges are checked in code, not here, so each LLM mistake can be logged for the data card."""
+    student_id: str
+    full_name: str
+    cgpa: float
+    attendance: list[GeneratedAttendance]
+    results: list[GeneratedMarks]
+
+
 # --- C ---  LLM outputs, API contract (Part G), audit (Annex D)
 
 class Understanding(BaseModel):

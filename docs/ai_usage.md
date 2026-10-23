@@ -21,6 +21,7 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 |---|---|---|---|
 | 2026-10-23 | Edge-case plan (`docs/data_card.md` draft) and generator prompts in `data/prompts/` | Claude Code | Checked against spec F.6 edge-case list; prompt placeholders test-filled with Python `string.Template` |
 | 2026-10-23 | Stubs: `app/tools.py`, `app/guardrail.py` and their stub tests | Claude Code | Signatures compared with WORKLOG section 3 and spec D.7; `pytest` 10 passed |
+| 2026-10-23 | `scripts/generate_students.py` and the generator models in `app/schemas.py` | Claude Code | Mock dry run: all 10 edge cases checked by hand (e.g. 30/40 and 29/40 at 75%, CGPA 7.00/6.99). A fake LLM returning bad replies confirmed errors are logged and retried, and fixed values are kept. End-to-end run against a test rule registry; empty registry stops with `NO_RULE`. `pytest` 20 passed |
 
 ## Person C: Foundation, Pipeline & Shipping
 

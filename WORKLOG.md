@@ -85,6 +85,7 @@ git push origin main
 _Write here when you need something from someone else's file. The owner deletes the line once it's done._
 
 - **C → A (Naman → Panshul):** please push `app/retrieval.py` with `health() -> "ok" | "error"` (Chroma `heartbeat()`) early, even if `search()` is still a stub. `/health` reports `vector_store: "error"` until then. Once it lands, C removes the temporary import guard in `app/main.py`.
+- **B → A (Pranjal → Panshul):** please push `data/rules.csv` (and `scripts/load_rules.py`) with at least these 4 parameters: `min_attendance_pct`, `pass_mark_pct`, `placement_min_cgpa`, `placement_max_backlogs`. Also the supplementary rule (which results may sit it: FAIL / ABSENT / DETAINED?). `generate_students.py` stops with `NO_RULE` until they are loaded, and every edge-case number depends on them.
 
 ---
 
@@ -136,6 +137,12 @@ Add a new entry at the **bottom of your own section** for each push:
   - `tools.py`: `get_student(student_id) -> StudentProfile | None`, `list_courses(student_id) -> list[dict]` (`course_code`, `course_name`), and the 6 D.7 tools. `as_of_date` is a `"YYYY-MM-DD"` string; `check_placement_eligibility(student_id, as_of_date, assume_passed=None)`. Until step 5 every tool returns a `ToolResult` with `status="error"`.
   - `guardrail.py`: `check(header_student_id, question, category) -> str | None`, plus the fixed messages `REFUSE_OTHER_STUDENT` and `REFUSE_NOT_LOGGED_IN`. The stub allows everything for now.
 - How to check it: `python -m pytest -q` (10 passed)
+- AI-generated? yes (also logged in docs/ai_usage.md)
+
+### 2026-10-23: Student data generator
+- Files: `scripts/generate_students.py`, `app/schemas.py` (B section: `GeneratedStudent`, `GeneratedAttendance`, `GeneratedMarks`)
+- What it does: builds `students.csv`, `courses.csv`, `attendance.csv`, `results.csv` and `generation_log.txt` in `data/students/`. Code fixes the edge-case plan (S1001–S1010) and every boundary number from thresholds resolved by `precedence.resolve_rules()`; the LLM (temperature 0.7) fills in names and the other values. Each reply is range-checked and retried (up to 3 attempts); every error caught is logged. Total, result and active_backlogs are always computed by code. Real data not generated yet: waiting for A's `rules.csv` (request in section 5).
+- How to check it: after `load_rules.py`, run `python scripts/generate_students.py` (add `MOCK_LLM=true` to run without Ollama). With an empty registry it stops with `NO_RULE`. `pytest` 20 passed.
 - AI-generated? yes (also logged in docs/ai_usage.md)
 
 ### Person C: Foundation, Pipeline & Shipping
