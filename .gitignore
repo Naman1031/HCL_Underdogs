@@ -18,6 +18,7 @@ env/
 *.sqlite3
 data/chroma/
 data/sqlite/
+data/uploads/
 
 # Model caches pulled at build time
 .cache/

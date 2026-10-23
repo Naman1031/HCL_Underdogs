@@ -22,3 +22,4 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 
 | Date | What was generated | Tool | How it was verified |
 |---|---|---|---|
+| 2026-10-23 | Step 1 foundation: `config.py`, `schemas.py`, `db.py`, `llm.py`, `main.py` (`/health`, `/sources`), `requirements.txt`, `.env.example`, pytest setup, `tests/test_api.py` | Claude Code (Claude Opus 5.5) | `pytest` passes 7 tests, covering `/health`, `/sources`, date validation, and LLM JSON retry/give-up with Ollama faked. Started uvicorn and checked `/health` with `MOCK_LLM=true` (`llm: mock`) and with real Ollama (`llm: ok`). SQL tables compared line by line against spec F.2. |

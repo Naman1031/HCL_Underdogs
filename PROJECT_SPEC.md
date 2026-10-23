@@ -735,6 +735,8 @@ The brief advises getting one end-to-end path working early (one document, one q
 
 ### I.3 .env.example
 
+**[TEAM] change (2026-10-23):** the committed `.env.example` uses local-development values (`./data/...`, `http://localhost:11434`). `docker-compose.yml` sets the container values shown below itself.
+
 ```
 MOCK_LLM=false
 LLM_BACKEND=ollama               # ollama | cloud (fallback only, disclose in README)
