@@ -114,10 +114,12 @@ def _is_superseded(chunk: Chunk, superseded: set[str]) -> bool:
     """True if the chunk's whole document, or its clause, is listed in a `supersedes` field."""
     if chunk.source.doc_id in superseded:
         return True
+    # PDF text often has stray spaces ("R. 1(B).22"), so clause labels are compared without spaces.
+    section = chunk.section.replace(" ", "")
     for entry in superseded:
         doc_id, _, clause = entry.partition("#")
-        if doc_id == chunk.source.doc_id and clause and (
-                chunk.section == clause or chunk.section.startswith(clause + " ")):
+        clause = clause.replace(" ", "")
+        if doc_id == chunk.source.doc_id and clause and section == clause:
             return True
     return False
 
@@ -467,7 +469,13 @@ def assemble(state: AskState) -> dict:
                                           section=chunk.section, page=chunk.page,
                                           version=chunk.source.version,
                                           effective_from=chunk.source.effective_from))
-    unique = list({(c.doc_id, c.section, c.page): c for c in citations}.values())
+    # One citation per (document, section); a chunk citation (which knows its page) beats a rule's.
+    by_clause: dict[tuple[str, str], Citation] = {}
+    for citation in citations:
+        key = (citation.doc_id, citation.section.replace(" ", ""))
+        if key not in by_clause or (by_clause[key].page is None and citation.page is not None):
+            by_clause[key] = citation
+    unique = list(by_clause.values())
     response = AskResponse(
         trace_id=state["trace_id"], answer=state["answer"], answer_type=state["answer_type"],
         citations=unique,
