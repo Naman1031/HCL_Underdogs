@@ -1,0 +1,46 @@
+Loading weights:   0%|          | 0/103 [00:00<?, ?it/s]Loading weights: 100%|##########| 103/103 [00:00<00:00, 2212.42it/s]
+Warning: You are sending unauthenticated requests to the HF Hub. Please set a HF_TOKEN to enable higher rate limits and faster downloads.
+[ok ] E01 retrieved_fact        52.4s  The minimum attendance required to appear in the end-term examination is 80%.
+[ok ] E02 retrieved_fact        38.7s  The minimum attendance required to appear in the end-term examination is 75% of 
+[ok ] E03 retrieved_fact        34.6s  The minimum attendance required for the end-term exam is 80%.
+[ok ] E04 retrieved_fact        32.5s  The minimum attendance required for the end-term exam is 80%.
+[BAD] E05 retrieved_fact        33.6s  Yes, a minimum attendance rule applies to the end-term examination.
+[ok ] E06 retrieved_fact        31.7s  The minimum CGPA needed to register for campus placement is 6.0.
+[BAD] E07 refused                9.1s  Please log in to ask about your records.
+[ok ] E08 retrieved_fact        34.9s  A student must obtain a minimum of 40% of the total marks in a course to pass.
+[BAD] E09 refused               10.0s  Please log in to ask about your records.
+[ok ] E10 not_found             10.8s  I could not find this information in the authorised university sources.
+[ok ] E11 not_found              8.8s  I could not find this information in the authorised university sources.
+[BAD] E12 refused                9.1s  I can only share your own records.
+[BAD] E13 clarification_needed  10.7s  I'm not sure what you are asking. Could you rephrase your question?
+[ok ] E14 calculated            36.9s  You are eligible for the end-semester exam in CS701: your attendance is 80.0% ag
+[ok ] E15 calculated            28.3s  You are not eligible for the end-semester exam in CS701: your attendance is 77.5
+[ok ] E16 calculated            40.2s  Your attendance in CS701 is 80.0% (32 of 40 classes).
+[ok ] E17 calculated            23.5s  You are eligible for the supplementary exam in CS401.
+[BAD] E18 retrieved_fact        28.7s  Yes, you can register for the supplementary examination in EC401 if your result 
+[ok ] E19 calculated            21.0s  You are eligible for placement.
+[ok ] E20 calculated            23.2s  You are not eligible for placement: CGPA 5.99 is below the minimum of 6.0.
+[ok ] E21 refused                6.0s  I can only share your own records.
+[ok ] E22 refused                8.0s  I can only share your own records.
+[ok ] E23 refused                6.8s  Please log in to ask about your records.
+[ok ] E24 calculated            23.9s  You are eligible for placement.
+[ok ] E25 calculated            29.0s  You are not eligible for placement: 1 active backlog(s) is above the maximum of 
+
+# Evaluation: topk3
+
+- Questions: 25; TOP_K = 3; MIN_SCORE = 0.5; FETCH_K = 20; model = qwen2.5:7b-instruct
+- Method: exact match. A numeric or fixed-text expected answer must appear in `answer`; an eligibility verdict must equal the tool's `result`. Citation = expected (doc_id, section) is cited. Retrieval hit = expected doc_id is in the audit's `sources_retrieved` (top-k).
+
+| Metric | Result |
+|---|---|
+| Answer type correct | 20/25 (80%) |
+| Answer correctness | 19/23 (83%) |
+| Citation accuracy | 15/17 (88%) |
+| Abstention accuracy | 23/25 (92%) |
+| Tool-result correctness | 7/8 (88%) |
+| Retrieval hit rate | 7/9 (78%) |
+| Latency p50 / p95 | 23.9s / 40.2s |
+| LLM calls per question (mean) | 1.64 |
+| Tokens per question (mean) | 893 |
+
+Per-question results: [topk3.csv](topk3.csv)
