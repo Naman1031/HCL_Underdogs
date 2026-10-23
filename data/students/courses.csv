@@ -1,0 +1,17 @@
+course_code,course_name,programme,semester,credits
+CS401,Design and Analysis of Algorithms,B.Tech CSE,4,4
+CS402,Database Management Systems,B.Tech CSE,4,3
+CS501,Operating Systems,B.Tech CSE,5,4
+CS502,Computer Networks,B.Tech CSE,5,3
+CS601,Compiler Design,B.Tech CSE,6,4
+CS602,Machine Learning,B.Tech CSE,6,3
+CS701,Distributed Systems,B.Tech CSE,7,4
+CS702,Information Security,B.Tech CSE,7,3
+EC401,Analog Circuits,B.Tech ECE,4,4
+EC402,Signals and Systems,B.Tech ECE,4,3
+EC501,Digital Communication,B.Tech ECE,5,4
+EC502,Microprocessors,B.Tech ECE,5,3
+EC601,VLSI Design,B.Tech ECE,6,4
+EC602,Control Systems,B.Tech ECE,6,3
+EC701,Wireless Communication,B.Tech ECE,7,4
+EC702,Embedded Systems,B.Tech ECE,7,3

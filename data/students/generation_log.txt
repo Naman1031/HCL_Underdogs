@@ -1,0 +1,6 @@
+{"students": 30, "llm_calls": 32, "tokens": 24331, "errors_logged": 5, "model": "qwen2.5:7b-instruct", "temperature": 0.7}
+S1006: LLM changed fixed classes_attended for EC501 (35); kept 20
+S1013 attempt 1: attendance courses ['CS701'] instead of ['CS701', 'CS702']
+S1013 attempt 1: result courses ['CS601'] instead of ['CS601', 'CS602']
+S1020 attempt 1: attendance courses ['CS501'] instead of ['CS501', 'CS502']
+S1020 attempt 1: result courses ['CS401'] instead of ['CS401', 'CS402']

@@ -1,0 +1,7 @@
+Validation of C:\HCL_Hackathon\data\students (our data: all checks), rules as of 2026-10-23
+RESULT: PASS (0 errors)
+
+Rows: students.csv 30, courses.csv 16, attendance.csv 60, results.csv 61
+Students per programme / batch: B.Tech CSE 2023: 7, B.Tech CSE 2024: 8, B.Tech ECE 2023: 8, B.Tech ECE 2024: 7
+Results by outcome: ABSENT 1, DETAINED 1, FAIL 4, PASS 55
+
