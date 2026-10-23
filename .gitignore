@@ -30,3 +30,7 @@ data/uploads/
 # Editors
 .vscode/
 .idea/
+
+# Source PDFs: 120MB, GitHub blocks >100MB. Brief section 8 allows download
+# links instead; provenance URLs live in data/source_register.csv.
+data/documents/*.pdf

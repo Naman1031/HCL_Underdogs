@@ -13,6 +13,8 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 | Date | What was generated | Tool | How it was verified |
 |---|---|---|---|
 
+| `app/precedence.py`, `tests/test_precedence.py` | Claude Code (Opus 5) | Annex A steps 1-5 + 10 unit tests | I read every function and every test; the Annex A.3 worked example from the brief passes exactly (80%, step 2). Ran `pytest` locally: 10 passed. |
+
 ## Person B: Students, Tools & Eval
 
 | Date | What was generated | Tool | How it was verified |

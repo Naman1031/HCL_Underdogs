@@ -110,6 +110,18 @@ Add a new entry at the **bottom of your own section** for each push:
 
 ### Person A: Documents & Rules
 
+### 2026-10-23: precedence.py (Annex A) with unit tests
+- Files: `app/precedence.py`, `tests/test_precedence.py`, `.gitignore`
+- What it does: Annex A.2 steps 1-5 as pure functions (no DB/LLM), returning the
+  shared `Resolution` from `app/schemas.py`. `applicability()` does step 1 incl.
+  `2023+` / `;` scope formats; `resolve_rules()` does supersession, authority,
+  recency and conflict, and writes the Annex D `precedence_decision` sentence.
+- How to check it: `PYTHONPATH=. pytest tests/test_precedence.py -q` -> 10 passed.
+  The brief's Annex A.3 worked example is the first test: 80%, step 2, FAQ overridden.
+- Note: `.gitignore` now excludes `data/documents/*.pdf` (120MB; GitHub blocks
+  >100MB). Brief section 8 allows download links, which go in source_register.csv.
+- AI-generated? yes, Claude Code (reviewed by me; all 10 tests read and verified)
+
 ### Person B: Students, Tools & Eval
 
 ### 2026-10-23: Edge-case plan and generator prompts
