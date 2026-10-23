@@ -118,6 +118,14 @@ Add a new entry at the **bottom of your own section** for each push:
 - How to check it: read the "Edge cases" table in `docs/data_card.md`
 - AI-generated? yes (also logged in docs/ai_usage.md)
 
+### 2026-10-23: Stubs for tools and guardrail
+- Files: `app/tools.py`, `app/guardrail.py`, `tests/test_tools.py`, `tests/test_guardrail.py`
+- What it does: final signatures from section 3, placeholder bodies. **C: you can import these now.**
+  - `tools.py`: `get_student(student_id) -> StudentProfile | None`, `list_courses(student_id) -> list[dict]` (`course_code`, `course_name`), and the 6 D.7 tools. `as_of_date` is a `"YYYY-MM-DD"` string; `check_placement_eligibility(student_id, as_of_date, assume_passed=None)`. Until step 5 every tool returns a `ToolResult` with `status="error"`.
+  - `guardrail.py`: `check(header_student_id, question, category) -> str | None`, plus the fixed messages `REFUSE_OTHER_STUDENT` and `REFUSE_NOT_LOGGED_IN`. The stub allows everything for now.
+- How to check it: `python -m pytest -q` (10 passed)
+- AI-generated? yes (also logged in docs/ai_usage.md)
+
 ### Person C: Foundation, Pipeline & Shipping
 
 ### 2026-10-23: Foundation (step 1, spec Phase 0)
