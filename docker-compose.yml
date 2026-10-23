@@ -1,0 +1,50 @@
+# docker compose up  ->  API on :8000, UI on :8501. Ollama runs on the host (spec D.1, I.2).
+services:
+  api:
+    build: .
+    image: student-assistant:latest
+    # Bootstrap is idempotent: documents already indexed are skipped, so restarts never re-ingest.
+    command: sh -c "python scripts/bootstrap.py && uvicorn app.main:app --host 0.0.0.0 --port 8000"
+    ports:
+      - "8000:8000"
+    environment:
+      MOCK_LLM: ${MOCK_LLM:-false}
+      LLM_BACKEND: ${LLM_BACKEND:-ollama}
+      LLM_MODEL: ${LLM_MODEL:-qwen2.5:7b-instruct}
+      OLLAMA_URL: http://host.docker.internal:11434
+      TOP_K: ${TOP_K:-4}
+      MIN_SCORE: ${MIN_SCORE:-0.5}
+      CHROMA_PATH: /data/chroma
+      SQLITE_PATH: /data/sqlite/app.db
+      UPLOADS_DIR: /data/uploads
+    volumes:
+      - chroma_data:/data/chroma
+      - sqlite_data:/data/sqlite
+      - uploads_data:/data/uploads
+      - ./data:/app/data:ro                 # documents, register, rules, students
+      - ./test_students:/data/test_students:ro   # judges drop their CSVs here
+    extra_hosts:
+      - "host.docker.internal:host-gateway"  # lets Linux hosts reach Ollama on the host
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 30
+      start_period: 60s
+
+  ui:
+    build: .
+    image: student-assistant:latest
+    command: streamlit run ui/streamlit_app.py --server.port 8501 --server.address 0.0.0.0
+    ports:
+      - "8501:8501"
+    environment:
+      API_URL: http://api:8000
+    depends_on:
+      api:
+        condition: service_healthy
+
+volumes:
+  chroma_data:
+  sqlite_data:
+  uploads_data:

@@ -16,7 +16,9 @@ $fixed_values
 
 fill_in: $fill_in
 
-Return JSON with exactly this shape:
+"attendance" must have one entry for EVERY current-semester course listed above, and "results" one entry for EVERY previous-semester course listed above, including the courses in fixed_values.
+
+Return JSON with exactly this shape (the lists show one entry only as an example):
 {"student_id": "S0000", "full_name": "First Last", "cgpa": 0.0,
  "attendance": [{"course_code": "XX000", "classes_held": 0, "classes_attended": 0}],
  "results": [{"course_code": "XX000", "internal_marks": 0, "external_marks": 0}]}

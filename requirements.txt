@@ -1,5 +1,4 @@
 # Owner: C. Others may APPEND lines only (and say so in WORKLOG.md).
-# Minimum versions for now; exact pins are added once the Docker image builds.
 
 # API
 fastapi>=0.110
@@ -11,10 +10,11 @@ python-multipart>=0.0.9
 langgraph>=0.2
 httpx>=0.27
 
-# Retrieval and ingestion
+# Retrieval and ingestion. Text extraction uses pypdf (app/ingest.py); Docling was
+# dropped to keep the image small, so scanned pages are reported, not OCR'd (README).
 chromadb>=0.5
 sentence-transformers>=3.0
-docling>=2.0
+pypdf>=4.0
 
 # UI
 streamlit>=1.35

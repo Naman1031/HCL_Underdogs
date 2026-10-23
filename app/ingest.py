@@ -20,11 +20,14 @@ from app.schemas import IngestResponse, SourceMeta
 # A chunk is cut at roughly this many words. MiniLM truncates above 256 word
 # pieces, and words are fewer than word-pieces, so this stays safely inside it.
 WORDS_PER_CHUNK = 180
-CHUNK_OVERLAP_WORDS = 30  # keeps a clause from being split away from its heading
+CHUNK_OVERLAP_WORDS = 30  # only used when one clause is longer than a chunk
+MIN_CHUNK_WORDS = 5  # drops stray page numbers and headers, keeps short clauses
+SHORT_UNIT_WORDS = 12  # shorter units (table rows, headings) join the previous chunk
 
-# "R.1(B).22", "7.2", "Annexure - 3", "### 2. Minimum attendance"
+# "R.1(B).22", "7.2", "Annexure - 3". Clause parts have 1-2 digits and are followed by a
+# space, so table values such as "163.87" or "43.110" are not mistaken for clause numbers.
 SECTION_PATTERN = re.compile(
-    r"^\s*(?:#+\s*)?((?:R\.\s?\d+\([A-Z]\)\.\d+)|(?:\d+(?:\.\d+)+)|(?:Annexure\s*-?\s*\d+))",
+    r"^\s*(?:#+\s*)?((?:R\.\s?\d+\([A-Z]\)\.\d+)|(?:\d{1,2}(?:\.\d{1,2})+(?=\s))|(?:Annexure\s*-?\s*\d+))",
     re.MULTILINE,
 )
 
@@ -52,28 +55,66 @@ def find_section(text: str, fallback: str) -> str:
     return match.group(1).strip() if match else fallback
 
 
-def chunk_pages(pages: list[str]) -> list[tuple[str, int, str]]:
+def clause_units(pages: list[str]) -> list[tuple[list[str], int, str]]:
     """
-    Cut pages into overlapping word windows.
+    Split pages into clause units: (words, page_number, section).
 
-    Returns (text, page_number, section) so every chunk can cite the page it
-    came from, which is what R2 asks for.
+    A new unit starts at every line that begins with a clause number, so a chunk
+    can cite the clause it actually contains (R2). Lines before the first clause
+    keep the previous section (or "" at the start of a document).
     """
-    chunks: list[tuple[str, int, str]] = []
+    units: list[tuple[list[str], int, str]] = []
     section = ""
     for page_no, raw in enumerate(pages, start=1):
-        text = re.sub(r"[ \t]+", " ", raw).strip()
-        if not text:
-            continue  # scanned page with no text layer
-        words = text.split()
-        step = max(WORDS_PER_CHUNK - CHUNK_OVERLAP_WORDS, 1)
-        for start in range(0, len(words), step):
-            window = " ".join(words[start : start + WORDS_PER_CHUNK])
-            if len(window.split()) < 20:
-                continue  # too small to be useful evidence
-            section = find_section(window, section)
-            chunks.append((window, page_no, section))
-    return chunks
+        current: list[str] | None = None  # never continue a unit across pages: the page must stay exact
+        for line in raw.splitlines():
+            line = re.sub(r"[ \t]+", " ", line).strip()
+            if not line:
+                continue
+            match = SECTION_PATTERN.match(line)
+            if match:
+                section, current = match.group(1).strip(), None
+            if current is None:
+                current = []
+                units.append((current, page_no, section))
+            current.extend(line.split())
+    return units
+
+
+def chunk_pages(pages: list[str]) -> list[tuple[str, int, str]]:
+    """
+    One chunk per clause, so each chunk's section is the clause it holds.
+
+    Returns (text, page_number, section). A chunk never spans two pages. Very
+    short units (table rows, headings) join the previous chunk instead of standing
+    alone; a clause longer than WORDS_PER_CHUNK is cut into overlapping windows.
+    Scanned pages (no text layer) yield nothing.
+    """
+    chunks: list[tuple[str, int, str]] = []
+    words: list[str] = []
+    page, section = 0, ""
+    for unit_words, unit_page, unit_section in clause_units(pages):
+        joins_previous = (len(unit_words) < SHORT_UNIT_WORDS and unit_page == page
+                          and len(words) + len(unit_words) <= WORDS_PER_CHUNK)
+        if words and not joins_previous:
+            chunks.append((" ".join(words), page, section))
+            words = []
+        if not words:
+            page, section = unit_page, unit_section
+        words += unit_words
+        while len(words) > WORDS_PER_CHUNK:
+            chunks.append((" ".join(words[:WORDS_PER_CHUNK]), page, section))
+            words = words[WORDS_PER_CHUNK - CHUNK_OVERLAP_WORDS:]
+    if words:
+        chunks.append((" ".join(words), page, section))
+    # Some PDFs repeat whole pages; identical chunks would only crowd out other evidence in top-k.
+    seen: set[str] = set()
+    unique = []
+    for chunk in chunks:
+        if len(chunk[0].split()) >= MIN_CHUNK_WORDS and chunk[0] not in seen:
+            seen.add(chunk[0])
+            unique.append(chunk)
+    return unique
 
 
 def register_source(meta: SourceMeta, chunks_indexed: int) -> None:

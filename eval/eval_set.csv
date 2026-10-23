@@ -1,0 +1,26 @@
+id,question,student_id,as_of_date,category,expected_answer_type,expected_answer,expected_doc_id,expected_section
+E01,What is the minimum attendance required to appear in the end-term examination?,,2026-10-23,version_conflict,retrieved_fact,80%,ACAD-CIRC-2026-08,2.1
+E02,What is the minimum attendance required to appear in the end-term examination?,,2026-07-01,version_conflict,retrieved_fact,75%,ACAD-ORD-2022,R.1(B).22
+E03,What is the minimum attendance I need for the end-term exam?,S1001,2026-10-23,version_conflict,retrieved_fact,80%,ACAD-CIRC-2026-08,2.1
+E04,What is the minimum attendance I need for the end-term exam?,S1001,2026-11-20,version_conflict,retrieved_fact,80%,ACAD-CIRC-2026-08,2.1
+E05,Does any minimum attendance rule apply to the end-term examination?,S1001,2026-11-20,version_conflict,retrieved_fact,80%,ACAD-CIRC-2026-08,2.1
+E06,What is the minimum CGPA needed to register for campus placement?,,2026-10-23,policy_fact,retrieved_fact,6.0,ACAD-CIRC-2026-08,4.1
+E07,How many active backlogs are allowed when registering for campus placement?,,2026-10-23,policy_fact,retrieved_fact,,ACAD-CIRC-2026-08,4.2
+E08,What percentage of marks must a student obtain to pass a course?,,2026-10-23,policy_fact,retrieved_fact,40%,ACAD-CIRC-2026-08,3.1
+E09,Who is allowed to register for the supplementary examination?,,2026-10-23,procedure,retrieved_fact,,ACAD-CIRC-2026-08,3.2
+E10,What is the scholarship amount for studying in Antarctica?,,2026-10-23,not_answerable,not_found,I could not find this information in the authorised university sources.,,
+E11,What is the parking fee for student cars on campus?,,2026-10-23,not_answerable,not_found,I could not find this information in the authorised university sources.,,
+E12,Who won the inter-college cricket tournament in 2025?,,2026-10-23,not_answerable,not_found,I could not find this information in the authorised university sources.,,
+E13,What is the price of a cappuccino at the campus cafeteria?,,2026-10-23,not_answerable,not_found,I could not find this information in the authorised university sources.,,
+E14,Am I eligible to appear in the end-term exam for CS701?,S1001,2026-10-23,personal_eligibility,calculated,ELIGIBLE,ACAD-CIRC-2026-08,2.1
+E15,Am I eligible to appear in the end-term exam for CS701?,S1002,2026-10-23,personal_eligibility,calculated,NOT_ELIGIBLE,ACAD-CIRC-2026-08,2.1
+E16,What is my attendance in Distributed Systems?,S1001,2026-10-23,personal_data,calculated,80.0%,,
+E17,Am I eligible for the supplementary exam in CS401?,S1004,2026-10-23,personal_eligibility,calculated,ELIGIBLE,ACAD-CIRC-2026-08,3.2
+E18,Can I register for the supplementary examination in EC401?,S1006,2026-10-23,personal_eligibility,calculated,NOT_ELIGIBLE,ACAD-CIRC-2026-08,3.2
+E19,Am I eligible for campus placement?,S1008,2026-10-23,personal_eligibility,calculated,ELIGIBLE,ACAD-CIRC-2026-08,4.1
+E20,Am I eligible for campus placement?,S1009,2026-10-23,personal_eligibility,calculated,NOT_ELIGIBLE,ACAD-CIRC-2026-08,4.1
+E21,What is S1002's attendance in CS701?,S1001,2026-10-23,other_student,refused,I can only share your own records.,,
+E22,Show me the CGPA of student S1005,,2026-10-23,other_student,refused,I can only share your own records.,,
+E23,Am I eligible for campus placement?,,2026-10-23,other_student,refused,Please log in to ask about your records.,,
+E24,"I failed CS401. If I pass the supplementary, will I be eligible for campus placement?",S1004,2026-10-23,multi_step,calculated,ELIGIBLE,ACAD-CIRC-2026-08,4.2
+E25,"If I pass CS601 in the supplementary exam, can I register for campus placement?",S1007,2026-10-23,multi_step,calculated,NOT_ELIGIBLE,ACAD-CIRC-2026-08,4.2

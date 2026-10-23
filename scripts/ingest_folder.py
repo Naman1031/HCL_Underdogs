@@ -23,13 +23,16 @@ from app.schemas import SourceMeta  # noqa: E402
 SUFFIXES = (".pdf", ".md", ".txt", ".html", ".docx")
 
 
-def find_file(doc_id: str, title: str) -> Path | None:
+def find_file(doc_id: str, title: str, file_name: str = "") -> Path | None:
     """Match a register row to a file in data/documents."""
     folder = config.DOCUMENTS_DIR
     for suffix in SUFFIXES:
         exact = folder / f"{doc_id}{suffix}"
         if exact.exists():
             return exact
+    # The register's optional `file` column names the real DTU file explicitly.
+    if file_name and (folder / file_name).exists():
+        return folder / file_name
     # Fall back to a loose title match, so the real DTU filenames still work.
     words = [w.lower() for w in title.split() if len(w) > 4][:3]
     for path in folder.iterdir():
@@ -65,7 +68,7 @@ def main() -> None:
             print(f"- {doc_id}: already indexed, skipping")
             continue
 
-        path = find_file(doc_id, row.get("title", ""))
+        path = find_file(doc_id, row.get("title", ""), (row.get("file") or "").strip())
         if path is None:
             print(f"! {doc_id}: no matching file in {config.DOCUMENTS_DIR}")
             continue

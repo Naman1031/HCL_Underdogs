@@ -7,6 +7,7 @@ classifies the question and words the explanation: at most 2 calls [spec C.2].
 """
 
 import json
+import re
 import time
 from datetime import date, datetime, timezone
 from typing import TypedDict
@@ -37,6 +38,7 @@ SUPPLEMENTARY_WORDS = ("supplementary", "supple", "reappear")
 TOOLS_NEEDING_COURSE = {"get_attendance", "check_exam_eligibility", "check_supplementary_eligibility"}
 SUPERSEDE_LEVELS = precedence.SUPERSESSION_LEVELS  # only level 1-2 may supersede (Annex A step 2)
 UNTRUSTED_LEVEL = precedence.UNTRUSTED_AUTHORITY_LEVEL  # level 5 never decides (Annex A)
+NUMBER = re.compile(r"\d+(?:\.\d+)?")  # for the number grounding check [BRIEF R3]
 
 
 class AskState(TypedDict, total=False):
@@ -309,12 +311,22 @@ def _calculated_answer(result: ToolResult) -> str:
                     f"({out['classes_attended']} of {out['classes_held']} classes).")
         if result.tool == "get_student_profile":
             return f"Your CGPA is {out['cgpa']} and you have {out['active_backlogs']} active backlog(s)."
+        if result.tool == "get_results":
+            latest = out["results"][0]
+            return (f"Your latest result in {latest['course_code']} is {latest['result']}: "
+                    f"{latest['total_marks']}/{latest['max_marks']} ({latest['exam_session']}, "
+                    f"{latest['exam_type'].lower()}).")
         targets = {"check_exam_eligibility": f"the end-semester exam{in_course}",
                    "check_supplementary_eligibility": f"the supplementary exam{in_course}",
                    "check_placement_eligibility": "placement"}
         if result.tool in targets and out.get("result") in ("ELIGIBLE", "NOT_ELIGIBLE"):
             verdict = "eligible" if out["result"] == "ELIGIBLE" else "not eligible"
-            return f"You are {verdict} for {targets[result.tool]}."
+            line = f"You are {verdict} for {targets[result.tool]}"
+            if result.tool == "check_exam_eligibility":
+                line += f": your attendance is {out['attendance_pct']}% against a minimum of {out['threshold']:g}%"
+            elif out.get("failed_checks"):
+                line += ": " + "; ".join(out["failed_checks"])
+            return line + "."
     except KeyError:
         pass  # unexpected tool output: fall through to the generic line
     return f"Here is your {result.tool.replace('_', ' ')} result{in_course}."
@@ -365,13 +377,18 @@ def _evidence_prompt(state: AskState) -> str:
     parts = [f"Question: {state['question']}"]
     for chunk in state.get("chunks", []):
         informational = ' informational="true"' if chunk.source.authority_level >= UNTRUSTED_LEVEL else ""
+        # Escape "<" so text inside a document can never close or fake an evidence tag [BRIEF R8].
+        text = chunk.text.replace("<", "&lt;")
         parts.append(f'<evidence id="{chunk.chunk_id}" doc="{chunk.source.doc_id}" '
-                     f'section="{chunk.section}"{informational}>\n{chunk.text}\n</evidence>')
+                     f'section="{chunk.section}"{informational}>\n{text}\n</evidence>')
     if state.get("tool_results"):
         outputs = [{"tool": r.tool, "output": r.output} for r in state["tool_results"]]
         parts.append("Tool outputs (already calculated by code):\n" + json.dumps(outputs))
     if state.get("applied_rules"):
         parts.append("Rules applied:\n" + json.dumps([r.model_dump() for r in state["applied_rules"]]))
+        parts.append("Rule sources:\n" + json.dumps([c.model_dump() for c in state.get("rule_citations", [])]))
+    if state.get("conflicts"):
+        parts.append("Precedence notes:\n" + "\n".join(state["conflicts"]))
     if state.get("assumptions"):
         parts.append("Assumptions:\n" + "\n".join(state["assumptions"]))
     if state.get("upcoming"):
@@ -400,13 +417,24 @@ def _fallback_text(state: AskState) -> ComposeOutput:
                          explanation="This result was calculated from your records using the cited rules.")
 
 
+def _numbers_grounded(llm_text: str, prompt: str) -> bool:
+    """Number grounding check (spec D.3 node 7): every number the LLM wrote must appear in what
+    it was given (evidence, tool outputs, rules, the code's answer). 75 and 75.0 count as equal."""
+    def normalise(n: str) -> str:
+        return f"{float(n):g}"
+    allowed = {normalise(n) for n in NUMBER.findall(prompt)}
+    return all(normalise(n) in allowed for n in NUMBER.findall(llm_text))
+
+
 def compose(state: AskState) -> dict:
     """LLM call 2: words the explanation. Skipped for fixed-message answers (spec D.3 node 7)."""
     if state["answer_type"] in ("refused", "not_found", "clarification_needed"):
         return {}
     fallback = _fallback_text(state)
-    result, usage = llm.chat_json(llm.COMPOSE_SYSTEM, _evidence_prompt(state), ComposeOutput, fallback)
-    result = result or fallback
+    prompt = _evidence_prompt(state)
+    result, usage = llm.chat_json(llm.COMPOSE_SYSTEM, prompt, ComposeOutput, fallback)
+    if result is None or not _numbers_grounded(f"{result.answer} {result.explanation}", prompt):
+        result = fallback  # never show a number the evidence does not contain [BRIEF R3]
     update = {"explanation": result.explanation,
               "llm_calls": state.get("llm_calls", 0) + usage.calls,
               "tokens": state.get("tokens", 0) + usage.tokens}
