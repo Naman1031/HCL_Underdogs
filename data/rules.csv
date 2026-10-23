@@ -1,0 +1,10 @@
+rule_id,description,parameter,operator,value,scope_programmes,scope_batches,effective_from,effective_to,source_doc_id,source_section,origin
+ATT-MIN-01,Minimum attendance to be eligible for the End-Term Examination of a subject,min_attendance_pct,>=,75,ALL,ALL,2022-07-01,,ACAD-ORD-2022,R.1(B).22,manual
+ATT-CONDONE-01,Maximum attendance relaxation the Dean may grant for recorded reasons,attendance_condonation_max_pct,<=,10,ALL,ALL,2022-07-01,,ACAD-ORD-2022,R.1(B).22,manual
+TERM-CREDIT-01,Minimum share of prescribed first-year credits required to stay enrolled,min_first_year_credit_pct,>=,30,ALL,ALL,2022-07-01,,ACAD-ORD-2022,R.1(B).25,manual
+ATT-MIN-02,Revised minimum attendance for the End-Term Examination,min_attendance_pct,>=,80,ALL,ALL,2026-08-01,,ACAD-CIRC-2026-08,2.1,manual
+PASS-MARK-01,Minimum total marks to pass a course,pass_mark_pct,>=,40,ALL,ALL,2026-08-01,,ACAD-CIRC-2026-08,3.1,manual
+SUPP-ELIG-01,Results for which a student may register for a supplementary examination,supplementary_allowed_results,in,FAIL;ABSENT,ALL,ALL,2026-08-01,,ACAD-CIRC-2026-08,3.2,manual
+PLACE-CGPA-01,Minimum CGPA to register for campus placement,placement_min_cgpa,>=,6.0,ALL,ALL,2026-08-01,,ACAD-CIRC-2026-08,4.1,manual
+PLACE-BACK-01,Maximum active backlogs permitted to register for campus placement,placement_max_backlogs,<=,0,ALL,ALL,2026-08-01,,ACAD-CIRC-2026-08,4.2,manual
+ATT-MIN-03,Proposed minimum attendance for the even semester (not yet in force),min_attendance_pct,>=,85,B.Tech CSE,ALL,2026-11-15,,DTU-NOTICE-2026-11,1,manual

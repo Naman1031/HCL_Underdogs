@@ -15,6 +15,9 @@ The brief requires this. Record every piece of AI-assisted work: what was genera
 
 | `app/precedence.py`, `tests/test_precedence.py` | Claude Code (Opus 5) | Annex A steps 1-5 + 10 unit tests | I read every function and every test; the Annex A.3 worked example from the brief passes exactly (80%, step 2). Ran `pytest` locally: 10 passed. |
 
+| `data/source_register.csv`, `data/rules.csv`, 2 synthetic documents | Claude Code (Opus 5) | Annex B register and 9 rule rows drafted from the PDFs | I checked the 75% value on page 27 of the 2022 Ordinance (clause R.1(B).22) against the PDF text myself. The two synthetic documents are team-authored and marked synthetic=Y. |
+| `app/retrieval.py`, `app/ingest.py`, `scripts/load_rules.py`, `scripts/ingest_folder.py` | Claude Code (Opus 5) | Chroma + MiniLM search, pypdf chunking, loaders | `load_rules.py` run locally: 9 rules loaded. Retrieval/ingest not yet run here (model not downloaded on this laptop) - flagged in WORKLOG section 5. |
+
 ## Person B: Students, Tools & Eval
 
 | Date | What was generated | Tool | How it was verified |

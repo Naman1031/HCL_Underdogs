@@ -220,7 +220,9 @@ def resolve_rules(
             decision_text=f"no applicable rule on {as_of_date.isoformat()} (step 1)",
         )
 
-    step_used: int | None = 1 if overridden else None
+    # Step 1 only filters out rules that do not apply at all; it never decides
+    # between genuine rivals, so it must not claim to be the deciding step.
+    step_used: int | None = None
 
     # --- Step 2: explicit supersession by an applicable level 1-2 document ---
     current_sources = [

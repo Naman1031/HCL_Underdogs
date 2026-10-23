@@ -208,3 +208,29 @@ def test_no_applicable_rule_returns_no_rule():
     """Callers turn NO_RULE into RULE_UNCERTAIN rather than guessing."""
     result = resolve_rules([], [], AS_OF)
     assert result.status == "NO_RULE"
+
+
+def test_step_1_filtering_does_not_claim_to_be_the_deciding_step():
+    """
+    Regression: dropping a not-yet-effective rule at step 1 must not make the
+    audit sentence read "(step 1)" when supersession is what actually decided.
+    """
+    sources = [
+        source("ACAD-ORD-2022", 1, "2022-07-01"),
+        source("ACAD-CIRC-2026-08", 2, "2026-08-01",
+               supersedes="ACAD-ORD-2022#R.1(B).22"),
+        source("DTU-NOTICE-2026-11", 3, "2026-11-15"),  # upcoming, filtered at step 1
+    ]
+    rules = [
+        rule("ATT-MIN-01", "75", "ACAD-ORD-2022", "R.1(B).22", "2022-07-01"),
+        rule("ATT-MIN-02", "80", "ACAD-CIRC-2026-08", "2.1", "2026-08-01"),
+        rule("ATT-MIN-03", "85", "DTU-NOTICE-2026-11", "1", "2026-11-15"),
+    ]
+
+    result = resolve_rules(rules, sources, AS_OF)
+
+    assert result.winner.value == "80"
+    assert result.step_used == 2
+    assert result.decision_text == (
+        "ACAD-CIRC-2026-08 supersedes ACAD-ORD-2022#R.1(B).22 (step 2)"
+    )

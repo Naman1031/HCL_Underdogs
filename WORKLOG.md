@@ -84,8 +84,9 @@ git push origin main
 
 _Write here when you need something from someone else's file. The owner deletes the line once it's done._
 
-- **C → A (Naman → Panshul):** please push `app/retrieval.py` with `health() -> "ok" | "error"` (Chroma `heartbeat()`) early, even if `search()` is still a stub. `/health` reports `vector_store: "error"` until then. Once it lands, C removes the temporary import guard in `app/main.py`.
-- **B → A (Pranjal → Panshul):** please push `data/rules.csv` (and `scripts/load_rules.py`) with at least these 4 parameters: `min_attendance_pct`, `pass_mark_pct`, `placement_min_cgpa`, `placement_max_backlogs`. Also the supplementary rule (which results may sit it: FAIL / ABSENT / DETAINED?). `generate_students.py` stops with `NO_RULE` until they are loaded, and every edge-case number depends on them.
+- **A → C (done):** `app/retrieval.py` is pushed with `health() -> "ok" | "error"` and a working `search()`. Imports are lazy, so importing it never breaks `/health`. Naman, you can drop the temporary import guard in `app/main.py`.
+- **A → B (done):** `data/rules.csv` + `scripts/load_rules.py` are pushed. All 4 parameters you asked for are there: `min_attendance_pct` (75 from ACAD-ORD-2022 R.1(B).22 p.27, raised to **80** by the superseding circular from 2026-08-01), `pass_mark_pct` **40**, `placement_min_cgpa` **6.0**, `placement_max_backlogs` **0**. Supplementary: `supplementary_allowed_results in FAIL;ABSENT` — **DETAINED is NOT eligible** (must repeat the course), see ACAD-CIRC-2026-08 clause 3.2. Run `python scripts/load_rules.py` -> "Loaded 9 rules".
+- **A → whoever has the model machine:** run `python scripts/ingest_folder.py` then `python scripts/load_rules.py`. `retrieval.py`/`ingest.py` are untested locally (no model on A's laptop).
 
 ---
 
@@ -122,6 +123,36 @@ Add a new entry at the **bottom of your own section** for each push:
 - Note: `.gitignore` now excludes `data/documents/*.pdf` (120MB; GitHub blocks
   >100MB). Brief section 8 allows download links, which go in source_register.csv.
 - AI-generated? yes, Claude Code (reviewed by me; all 10 tests read and verified)
+
+### 2026-10-23: source register, rules.csv, synthetic documents, ingest + retrieval
+- Files: `data/source_register.csv`, `data/rules.csv`,
+  `data/documents/ACAD-CIRC-2026-08.md`, `data/documents/DTU-NOTICE-2026-11.md`,
+  `app/retrieval.py`, `app/ingest.py`, `scripts/load_rules.py`,
+  `scripts/ingest_folder.py`, `tests/test_precedence.py`
+- What it does:
+  - Source Register (Annex B) for 3 real DTU documents + 2 synthetic ones.
+  - 9 hand-verified rules. The real one is `min_attendance_pct >= 75` from
+    ACAD-ORD-2022 clause R.1(B).22, **page 27** ("minimum attendance of 75% ...
+    in order to be eligible to appear at the End-Term Examination").
+  - Synthetic circular ACAD-CIRC-2026-08 supersedes that exact clause -> 80%.
+    Synthetic notice DTU-NOTICE-2026-11 is future-dated (upcoming demo) and
+    hides a prompt-injection line in clause 2.2 (R8 demo).
+  - `retrieval.py`: MiniLM embeddings + persistent Chroma. Heavy imports are
+    lazy, so the API still starts without the model and `health()` answers.
+  - `ingest.py`: pypdf -> ~180-word overlapping chunks with section + page
+    metadata; re-ingesting a doc_id replaces its chunks; registers the source.
+- How to check it:
+  - `python scripts/load_rules.py` -> "Loaded 9 rules into rule_registry."
+  - `PYTHONPATH=. pytest -q` -> 21 passed.
+  - Precedence on the real register: 2026-07-01 -> 75%, 2026-10-23 -> 80%
+    ("ACAD-CIRC-2026-08 supersedes ACAD-ORD-2022#R.1(B).22 (step 2)"), and
+    DTU-NOTICE-2026-11 reports as `upcoming`.
+- Fixed: step 1 filtering used to claim to be the deciding step in
+  `decision_text`; it is a filter, not a tie-break. Regression test added.
+- NOT verified on this machine: `retrieval.py` and `ingest.py` need chromadb +
+  sentence-transformers (~90MB model) which is not installed here. **Someone
+  with the model must run `python scripts/ingest_folder.py` before the demo.**
+- AI-generated? yes, Claude Code (reviewed by me; rule values read off the PDF)
 
 ### Person B: Students, Tools & Eval
 
