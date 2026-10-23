@@ -223,3 +223,10 @@ Add a new entry at the **bottom of your own section** for each push:
 - Live check with real `qwen2.5:7b-instruct` (fake retrieval): valid JSON from both calls, 2 LLM calls, cited answer. The first call takes about 90 s while the model loads, later questions 6-15 s.
 - Not yet: `/ask` returns 503 until A pushes `retrieval.py` (see section 5). `/ingest` is still 501. The number grounding check comes in step 4.
 - AI-generated? yes (Claude Code), logged in docs/ai_usage.md
+
+### 2026-10-23: Final integration on Naman's machine (team agreed)
+- Files: `app/tools.py`, `app/guardrail.py` (bodies, to B's interfaces), `app/ingest.py` (clause-aligned chunks, duplicate pages skipped, stricter clause numbers), `scripts/ingest_folder.py` + `file` column in `data/source_register.csv`, `app/graph.py` (number grounding check, evidence escaping, answer templates), `app/main.py` (`/ingest` live), `ui/streamlit_app.py`, `Dockerfile`, `docker-compose.yml`, `scripts/bootstrap.py`, `scripts/warmup.py`, `scripts/run_eval.py`, `eval/eval_set.csv`, `README.md`, `docs/EXPLAINED.md`, `docs/contributions.md`, `docs/data_card.md`, `docs/audit_samples/`, real generated data in `data/students/`
+- What it does: the full app runs end to end with the real model. Ingest gives 1,475 chunks (the 2025 Ordinance is scanned and reported). 9 rules loaded. 30 LLM-generated students, validated with 0 errors. `MIN_SCORE` raised to 0.5 after measuring scores (answerable 0.69-0.85, unanswerable 0.28-0.45).
+- How to check it: `python -m pytest -q` -> 66 passed. Run `uvicorn app.main:app` and `streamlit run ui/streamlit_app.py`, then try the 4 demos in docs/EXPLAINED.md section 7.
+- Not done: Docker build untested (no Docker engine here); OCR; documents not re-ingested with the new chunker.
+- AI-generated? yes (Claude Code), logged in docs/ai_usage.md

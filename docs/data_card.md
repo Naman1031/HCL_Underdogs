@@ -1,6 +1,6 @@
 # Data card: synthetic student data
 
-Annex E of the brief. **Draft (step 1):** the edge-case plan and design decisions are final; counts, validation results and LLM errors are filled in after the generator runs.
+Annex E of the brief. **Final:** generated on 2026-10-23 with thresholds resolved as of that date (attendance 80%, pass mark 40%, placement CGPA 6.0 and 0 backlogs).
 
 ## Purpose
 
@@ -8,7 +8,7 @@ Fictional students, courses, attendance and results for testing the assistant's 
 
 ## Generator
 
-- Model: `qwen2.5:7b-instruct` via Ollama (`app/llm.py`), temperature 0.7, one call per student (about 30 calls). Final count: _TODO after run_.
+- Model: `qwen2.5:7b-instruct` via Ollama (`app/llm.py`), temperature 0.7, one call per student plus retries: **32 LLM calls, 24,331 tokens** for 30 students.
 - Prompts (verbatim, loaded from disk by the generator): [`data/prompts/student_system_prompt.txt`](../data/prompts/student_system_prompt.txt), [`data/prompts/student_user_prompt.txt`](../data/prompts/student_user_prompt.txt). Placeholders use Python `string.Template` (`$name`), so JSON braces need no escaping.
 - **Code decides, the LLM fills in.** Code fixes `student_id`, programme, batch, semester, courses, `classes_held` and every edge-case value. The LLM only invents names, CGPA (normal students), `classes_attended` and internal/external marks for non-edge courses. Code then computes `total_marks`, `result` and `active_backlogs`, so they are always consistent.
 - Each LLM reply is validated with Pydantic and retried on failure. Any fixed value the LLM changed is overwritten by code and logged.
@@ -23,7 +23,7 @@ Fictional students, courses, attendance and results for testing the assistant's 
 | Courses | 16: 2 per semester (4, 5, 6, 7) per programme |
 | Attendance rows | current-semester courses, `classes_held` = 40 (see below) |
 | Result rows | previous-semester courses, session `2026-MAY`, `REGULAR`; one `SUPPLEMENTARY` in `2026-JUL` |
-| Marks scheme | internal 0–40, external 0–60, max 100. _TODO: confirm against the DTU scheme from Person A_ |
+| Marks scheme | internal 0–40, external 0–60, max 100 (assumption: a simplified scheme) |
 
 ### Courses
 
@@ -36,7 +36,7 @@ Fictional students, courses, attendance and results for testing the assistant's 
 
 ## Edge cases
 
-Thresholds come from `rule_registry` (Person A's `data/rules.csv`). Until it exists they are **TODO**; the bracketed values are only examples.
+Thresholds come from `rule_registry` (Person A's `data/rules.csv`). Values in force on 2026-10-23: `T_ATT` = 80 (ACAD-CIRC-2026-08 2.1), `PASS` = 40, `CGPA_CUT` = 6.0, `MAX_BL` = 0.
 
 - `T_ATT` = `min_attendance_pct` (e.g. 75)
 - `PASS` = `pass_mark_pct` (e.g. 40)
@@ -55,8 +55,8 @@ How code derives the boundary numbers:
 | S1002 | CSE / 2023 | Attendance one class below | CS701: `at − 1` / `held` | exam eligibility: NOT_ELIGIBLE |
 | S1003 | ECE / 2024 | Attendance exactly at threshold (other programme and batch, for scope) | EC501: `at` / `held` | exam eligibility: ELIGIBLE |
 | S1004 | CSE / 2024 | FAIL just below pass mark (what-if demo) | CS401 total = `PASS − 1`, backlogs = `MAX_BL + 1`, CGPA = `CGPA_CUT + 0.5` | supplementary: ELIGIBLE; placement: NOT_ELIGIBLE, ELIGIBLE with `assume_passed=["CS401"]` |
-| S1005 | ECE / 2023 | ABSENT | EC601 external = 0, total = internal, ABSENT | supplementary: ELIGIBLE (_TODO: confirm rule_) |
-| S1006 | ECE / 2024 | DETAINED | EC401 DETAINED, external = 0; EC501 attendance `held / 2` | supplementary: NOT_ELIGIBLE (_TODO: confirm rule_) |
+| S1005 | ECE / 2023 | ABSENT | EC601 external = 0, total = internal, ABSENT | supplementary: ELIGIBLE (SUPP-ELIG-01: FAIL or ABSENT) |
+| S1006 | ECE / 2024 | DETAINED | EC401 DETAINED, external = 0; EC501 attendance `held / 2` | supplementary: NOT_ELIGIBLE (SUPP-ELIG-01: DETAINED must repeat) |
 | S1007 | CSE / 2023 | Multiple backlogs | CS601 and CS602 FAIL, backlogs = `MAX_BL + 2` | placement: NOT_ELIGIBLE, still with one `assume_passed` |
 | S1008 | ECE / 2023 | CGPA exactly at cut-off | CGPA = `CGPA_CUT`, backlogs = 0 | placement: ELIGIBLE |
 | S1009 | ECE / 2024 | CGPA one below cut-off | CGPA = `CGPA_CUT − 0.01`, backlogs = 0 | placement: NOT_ELIGIBLE |
@@ -68,11 +68,20 @@ If `MAX_BL` turns out to be above 1, S1004 and S1007 need FAILs in earlier semes
 
 ## Validation results
 
-_TODO after `scripts/validate_students.py` runs (`data/students/validation_report.txt`)._
+`scripts/validate_students.py` -> **PASS (0 errors)** ([validation_report.txt](../data/students/validation_report.txt)).
+
+- Rows: students 30, courses 16, attendance 60, results 61.
+- Students per programme and batch: CSE 2023: 7, CSE 2024: 8, ECE 2023: 8, ECE 2024: 7.
+- Results: PASS 55, FAIL 4, ABSENT 1, DETAINED 1.
+- All 10 planned edge cases are present. The validator also catches deliberately broken rows (see `docs/ai_usage.md`, Person B).
 
 ## What the LLM got wrong
 
-_TODO: filled in from the generator's error log._
+5 errors caught and logged in [generation_log.txt](../data/students/generation_log.txt):
+
+- **Left out a course (4 errors, students S1013 and S1020):** the model copied the prompt's one-item example and returned only one attendance or result course. The validator rejected the reply and the retry was correct. After the first full run stopped on this (S1001 failed 3 times), we changed the prompt to say that every listed course must appear; that change is saved in `data/prompts/student_user_prompt.txt`.
+- **Overwrote a fixed edge-case value (1 error, S1006):** for the DETAINED edge case the model changed attendance to 35 classes; code kept the fixed 20.
+- Totals, results and backlogs are always computed by code, so the LLM could not make them inconsistent.
 
 ## Known limitations
 

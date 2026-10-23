@@ -1,0 +1,32 @@
+{
+  "trace_id": "a34e5a2a",
+  "timestamp": "2026-10-23T10:48:11Z",
+  "student_id": null,
+  "question_category": "policy_fact",
+  "sources_retrieved": [
+    {
+      "doc_id": "ACAD-ORD-2022",
+      "section": "163.87",
+      "score": 0.4278
+    },
+    {
+      "doc_id": "ACAD-ORD-2022",
+      "section": "163.87",
+      "score": 0.4226
+    },
+    {
+      "doc_id": "ACAD-ORD-2022",
+      "section": "163.87",
+      "score": 0.421
+    }
+  ],
+  "precedence_decision": "",
+  "rules_applied": [],
+  "conflicts_detected": [],
+  "tools_invoked": [],
+  "answer_type": "not_found",
+  "model": "qwen2.5:7b-instruct",
+  "llm_calls": 1,
+  "tokens": 419,
+  "latency_ms": 8740.1
+}
